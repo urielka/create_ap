@@ -668,8 +668,8 @@ _cleanup() {
     # kill haveged_watchdog
     [[ -n "$HAVEGED_WATCHDOG_PID" ]] && kill $HAVEGED_WATCHDOG_PID
 
-    # kill processes
-    for x in $CONFDIR/*.pid; do
+    # kill processes, except hostapd which goes nicely and if interuptted can cause havok with some drivers
+    for x in $(ls $CONFDIR/*.pid | grep -v hostapd); do
         # even if the $CONFDIR is empty, the for loop will assign
         # a value in $x. so we need to check if the value is a file
         [[ -f $x ]] && kill -9 $(cat $x)
@@ -1839,6 +1839,7 @@ STDBUF_PATH=`which stdbuf`
 if [ $? -eq 0 ]; then
     STDBUF_PATH=$STDBUF_PATH" -oL"
 fi
+
 $STDBUF_PATH $HOSTAPD $HOSTAPD_DEBUG_ARGS $CONFDIR/hostapd.conf &
 HOSTAPD_PID=$!
 echo $HOSTAPD_PID > $CONFDIR/hostapd.pid
